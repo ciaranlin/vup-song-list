@@ -11,6 +11,8 @@ let config = {
 
     LanguageCategories: ["日语", "英语"],
     RemarkCategories: [],
+    MoodCategories: ["舰长点歌"],
+
 
     BannerTitle: "日常碎碎念",
     BannerContent: [

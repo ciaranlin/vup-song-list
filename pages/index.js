@@ -31,6 +31,7 @@ export default function Home() {
     initial: "",
     paid: false,
     remark: "",
+    mood: "",  
   });
   const [searchBox, setSearchBox] = useState("");
   const [showToTopButton, setToTopShowButton] = useState(false);
@@ -69,7 +70,11 @@ export default function Home() {
         ? song.remarks?.toLowerCase().includes(categorySelection.remark)
         : true) &&
       //付费过滤按钮
-      (categorySelection.paid ? song.paid == 1 : true)
+      (categorySelection.paid ? song.paid == 1 : true) &&
+      // 新类别过滤按钮
+      (categorySelection.mood != ""
+        ? song.mood?.includes(categorySelection.mood)
+        : true)
   );
 
   //处理用户复制行为
@@ -83,35 +88,46 @@ export default function Home() {
     }
   };
 
-  //改变语言过滤状态
-  const setLanguageState = (lang) => {
-    setCategorySelection({ lang: lang, initial: "", paid: false, remark: "" });
-  };
+ // 改变语言过滤状态
+const setLanguageState = (lang) => {
+  setCategorySelection(prev => ({
+    ...prev,
+    lang: prev.lang === lang ? "" : lang
+  }));
+};
 
-  //改变首字母过滤状态
-  const setInitialState = (initial) => {
-    setCategorySelection({
-      lang: "国语",
-      initial: initial,
-      paid: false,
-      remark: "",
-    });
-  };
+// 改变首字母过滤状态
+const setInitialState = (initial) => {
+  setCategorySelection(prev => ({
+    ...prev,
+    initial: prev.initial === initial ? "" : initial
+  }));
+};
 
-  //改变备注过滤状态
-  const setRemarkState = (remark) => {
-    setCategorySelection({
-      lang: "",
-      initial: "",
-      paid: false,
-      remark: remark,
-    });
-  };
+// 改变备注过滤状态
+const setRemarkState = (remark) => {
+  setCategorySelection(prev => ({
+    ...prev,
+    remark: prev.remark === remark ? "" : remark
+  }));
+};
 
-  //改变收费过滤状态
-  const setPaidState = (paid) => {
-    setCategorySelection({ lang: "", initial: "", paid: paid, remark: "" });
-  };
+// 改变付费过滤状态
+const setPaidState = () => {
+  setCategorySelection(prev => ({
+    ...prev,
+    paid: !prev.paid
+  }));
+};
+
+// 改变新分类（mood）的过滤状态
+const setMoodState = (mood) => {
+  setCategorySelection(prev => ({
+    ...prev,
+    mood: prev.mood === mood ? "" : mood
+  }));
+};
+
 
   //随便听听
   const handleRandomSong = () => {
@@ -194,6 +210,7 @@ export default function Home() {
               setRemarkState={setRemarkState}
               setPaidState={setPaidState}
               setInitialState={setInitialState}
+              setMoodState={setMoodState}  
             />
           </Row>
           <Row>

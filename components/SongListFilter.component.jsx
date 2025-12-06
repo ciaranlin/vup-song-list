@@ -6,6 +6,8 @@ import { config } from "../config/constants";
 
 const languageCategories = config.LanguageCategories;
 const remarkCategories = config.RemarkCategories;
+const moodCategories = config.MoodCategories;
+
 
 const isActive = (selected, execpt) => {
   return selected == execpt
@@ -23,6 +25,7 @@ export default function SongListFilter({
   setRemarkState,
   setPaidState,
   setInitialState,
+  setMoodState,  
 }) {
   return (
     <Col>
@@ -88,6 +91,23 @@ export default function SongListFilter({
                       }}
                     >
                       {remark}
+                    </Button>
+                  </div>
+                </Col>
+              );
+            })}
+            
+            {moodCategories.map((mood) => {
+              return (
+                <Col xs={6} md={3} key={mood}>
+                  <div className="d-grid">
+                    <Button
+                      className={isActive(categorySelection.mood, mood)}
+                      onClick={() => {
+                        switchState(setMoodState, categorySelection.mood, mood);
+                      }}
+                    >
+                      {mood}
                     </Button>
                   </div>
                 </Col>
