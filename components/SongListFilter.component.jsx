@@ -94,20 +94,6 @@ export default function SongListFilter({
               );
             })}
 
-            <Col xs={6} md={3}>
-              <div className="d-grid">
-                <Button
-                  className={isActive(categorySelection.paid, true)}
-                  onClick={(e) => {
-                    categorySelection.paid
-                      ? setPaidState(false)
-                      : setPaidState(true);
-                  }}
-                >
-                  付费
-                </Button>
-              </div>
-            </Col>
           </Row>
         </Container>
       </div>

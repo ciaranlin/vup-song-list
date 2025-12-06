@@ -1,16 +1,9 @@
 import styles from "../styles/Home.module.css";
-
 import { SplitButton, Dropdown } from "react-bootstrap";
 import { getCursor } from "../utils/utils";
 import MusicList from "../public/music_list.json";
 
 const activeColor = "#BEA5C1";
-let availableAlphabets = [];
-MusicList.forEach((x) => {
-  if (x.initial.length === 1 && availableAlphabets.indexOf(x.initial) === -1) {
-    availableAlphabets.push(x.initial)
-  }
-})
 
 export default function MandarinBtn({
   languageFilter,
@@ -18,44 +11,54 @@ export default function MandarinBtn({
   setLanguageState,
   setInitialState,
 }) {
+  // 生成可用语言（这里假设你只关注“国语”，可扩展）
+  const languageOptions = ["国语"];
+
+  // 动态生成首字母数组，安全处理空值
+  const availableAlphabets = Array.from(
+    new Set(
+      MusicList
+        .map((x) => x.initial)
+        .filter((initial) => typeof initial === "string" && initial.length === 1)
+    )
+  ).sort();
+
   return (
     <div className="d-grid">
-      <SplitButton
-        title="国语"
-        className={
-          languageFilter == "国语"
-            ? styles.mandarinBtnActive
-            : styles.mandarinBtn
-        }
-        onClick={(e) => {
-          languageFilter == "国语"
-            ? setLanguageState("")
-            : setLanguageState("国语");
-        }}
-      >
-        {availableAlphabets.map((alphabet) => {
-          return (
+      {languageOptions.map((lang) => (
+        <SplitButton
+          key={lang}
+          title={lang}
+          className={
+            languageFilter === lang
+              ? styles.mandarinBtnActive
+              : styles.mandarinBtn
+          }
+          onClick={() => {
+            languageFilter === lang
+              ? setLanguageState("")
+              : setLanguageState(lang);
+          }}
+        >
+          {availableAlphabets.map((alphabet) => (
             <Dropdown.Item
-              onClick={(e) => {
-                initialFilter == alphabet
+              key={alphabet}
+              onClick={() => {
+                initialFilter === alphabet
                   ? setInitialState("")
                   : setInitialState(alphabet);
               }}
               style={
-                initialFilter == alphabet
-                  ? {
-                      backgroundColor: activeColor,
-                      cursor: getCursor(),
-                    }
+                initialFilter === alphabet
+                  ? { backgroundColor: activeColor, cursor: getCursor() }
                   : { cursor: getCursor() }
               }
-              key={alphabet}
             >
               首字母-{alphabet}
             </Dropdown.Item>
-          );
-        })}
-      </SplitButton>
+          ))}
+        </SplitButton>
+      ))}
     </div>
   );
 }

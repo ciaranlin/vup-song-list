@@ -1,17 +1,36 @@
 import json
 import pandas as pd
+import math
 
-song_df = pd.read_excel('./muisc.xlsx')
+def safe(v):
+    if v is None:
+        return None
+    if isinstance(v, float) and math.isnan(v):
+        return None
+    return v
+
+song_df = pd.read_excel('./music.xlsx')
 song_df = song_df.where(pd.notnull(song_df), None)
+
 song_list = []
 
 for index, row in song_df.iterrows():
-    song_data = {"index": index, "song_name": row[0], "artist": row[1], "language": row[2], "remarks": row[3], "initial": row[4], "sticky_top": row[5], "paid": row[6], "BVID": row[7]}
+    song_data = {
+        "index": index,
+        "song_name": safe(row[0]),
+        "artist": safe(row[1]),
+        "language": safe(row[2]),
+        "remarks": safe(row[3]),
+        "initial": safe(row[4]),
+        "sticky_top": safe(row[5]),
+        "paid": safe(row[6]),
+        "BVID": safe(row[7])
+    }
     if row[5] == 1:
-        song_list.insert(0,song_data)
+        song_list.insert(0, song_data)
     else:
         song_list.append(song_data)
-    
 
-with open("../public/music_list.json", 'w') as f:
-    f.write(json.dumps(song_list))
+with open("../public/music_list.json", 'w', encoding="utf-8") as f:
+    json.dump(song_list, f, ensure_ascii=False)
+

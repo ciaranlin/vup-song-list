@@ -66,7 +66,6 @@ export default function Banner({ songCount }) {
 
   return (
     <Col className={styles.titleCol}>
-      {/* 顶部头像标题区 */}
       <div className={"pt-3 " + styles.titleBox}>
         <Image
           loader={imageLoader}
@@ -85,30 +84,24 @@ export default function Banner({ songCount }) {
           可以点击歌名复制哦
         </p>
       </div>
-
-      {/* Banner 内部卡片 */}
       <div className={styles.introBox}>
         <div className={styles.introBoxInnerDiv}>
           <div className={styles.introTitle}>
             <h5>{config.BannerTitle}</h5>
 
-            {/* 网易云 & QQ音乐按钮 */}
+            {/* 网易云 & QQ音乐按钮 如果未填写 id 则不会展示 */}
             <div className="d-flex">
               {netEaseMusicComponent(config.NetEaseMusicId)}
               {qqMusicComponent(config.QQMusicId)}
             </div>
-          </div>
 
+          </div>
           {/* 首页文本 */}
           {config.BannerContent.map((cnt) => {
-            return (
-              <p className={styles.introParagraph} key={cnt}>
-                {cnt}
-              </p>
-            );
+            return <p className={styles.introParagraph} key={cnt}>{cnt}</p>;
           })}
 
-          {/* 自定义按钮（粉丝群 / 录播组） */}
+          {/* 首页自定义按钮 */}
           <div className="d-flex flex-nowrap justify-content-evenly">
             {config.CustomButtons.map((btn) => {
               return (
@@ -121,16 +114,16 @@ export default function Banner({ songCount }) {
                 ></BannerButton>
               );
             })}
-          </div>
 
-          {/* GIF 卡片（按钮正下方） */}
-          <div className="extra-card" style={{ textAlign: "center", marginTop: "20px" }}>
-            <img
-              src="/assets/images/my.gif"
-              alt="gif-card"
-              className="gif-image"
-              style={{ width: "180px", borderRadius: "12px" }}
-            />
+	  {/* 新增 GIF 卡片 */}
+	  <div className="extra-card">
+	    <img
+	      src="/assets/images/my.gif"
+	      alt="gif-card"
+	      className="gif-image"
+	    />
+	  </div>
+
           </div>
         </div>
       </div>

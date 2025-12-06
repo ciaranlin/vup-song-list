@@ -61,7 +61,7 @@ export default function Home() {
         ? song.language?.includes(categorySelection.lang)
         : true) &&
       //首字母过滤按钮
-      (categorySelection.initial !=""
+      (categorySelection.initial != ""
         ? song.initial?.includes(categorySelection.initial)
         : true) &&
       //类型过滤按钮
