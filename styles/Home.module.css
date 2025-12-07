@@ -329,3 +329,375 @@
   right: 0.25rem;
   z-index: 1;
 }
+
+/* 后台表格外框，与前台歌单保持统一 */
+.manageTable {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 8px;
+}
+
+/* 表头，和前台样式一致 */
+.manageTable th {
+  padding: 10px;
+  background: #e8eff4;
+  border-radius: 8px;
+  text-align: left;
+  font-weight: bold;
+  color: #333;
+}
+
+/* 行背景 */
+.manageTable td {
+  background: #f9fbfc;
+  padding: 8px;
+  border-radius: 8px;
+}
+
+/* 后台输入框 */
+.manageInput {
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 6px;
+}
+
+/* 右侧按钮不换行 */
+.manageActionCell {
+  white-space: nowrap;
+}
+/* 后台整体容器 */
+.manageCard {
+  width: 90%;
+  max-width: 1200px;
+  margin: 40px auto;
+  background: white;
+  border-radius: 14px;
+  padding: 30px 40px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+}
+
+/* 后台标题 */
+.manageTitle {
+  text-align: center;
+  font-size: 26px;
+  margin-bottom: 20px;
+  color: #2d3e50;
+  font-weight: bold;
+}
+
+/* 整页居中，背景与前台保持一致 */
+.pageContainer {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding-top: 30px;
+  background: var(--bgColor, #b9c7cf);  /* 和你前台背景一致 */
+}
+
+/* 卡片（白底、圆角、阴影，与首页歌单一致） */
+.manageCard {
+  width: 95%;
+  max-width: 1200px;
+  background: #ffffff;
+  padding: 30px 40px;
+  border-radius: 14px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* 标题美化 */
+.manageTitle {
+  text-align: center;
+  font-size: 26px;
+  margin-bottom: 20px;
+  color: #2d3e50;
+  font-weight: bold;
+}
+
+/* 表格整体控制（让后台表格对齐前台） */
+.manageTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.manageTable th {
+  background: #f5f5f5;
+  padding: 10px;
+  text-align: left;
+  font-weight: bold;
+}
+
+.manageTable td {
+  padding: 10px;
+  vertical-align: middle;
+}
+
+/* input 样式复用前台输入框 */
+.input {
+  width: 100%;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background: #fff;
+}
+
+/* 小按钮（复用前台蓝色/红色） */
+.btnBlueSmall {
+  padding: 5px 12px;
+  background: #3b82f6;
+  border-radius: 6px;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+}
+
+.btnRedSmall {
+  padding: 5px 12px;
+  background: #e53935;
+  border-radius: 6px;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+}
+
+.pageContainer {
+  display: flex;
+  justify-content: center;
+  padding-top: 40px;
+  padding-bottom: 40px;
+}
+
+.manageCard {
+  background: white;
+  width: 90%;
+  max-width: 1100px;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.manageTitle {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.manageTable {
+  width: 100%;
+  margin-top: 20px;
+}
+
+.manageTable table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.addSongRow {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.addSongRow input,
+.addSongRow select {
+  flex: 1;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 22px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .3s;
+  border-radius: 22px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  transition: .3s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #4CAF50;
+}
+
+input:checked + .slider:before {
+  transform: translateX(18px);
+}
+
+/* 整个后台标题 */
+.manageTitle {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+/* 添加歌曲一整行：所有控件在一行，最后是“添加”按钮 */
+.addSongRow {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+/* 添加行里的输入占同等空间 */
+.addSongRow input,
+.addSongRow select {
+  flex: 1;
+}
+
+/* “舰长点歌 + 开关” 小区域 */
+.addMoodWrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 110px; /* 防止折行 */
+}
+
+.moodLabel {
+  font-size: 12px;
+  color: #666;
+}
+
+/* 表格外层容器（和前台复用） */
+.songListMarco {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px 24px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+/* 表格宽度 100% 填满卡片 */
+.manageTable {
+  width: 100%;
+}
+
+.manageTable table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* 按钮所在单元格：让内容垂直居中 */
+.actionCell {
+  vertical-align: middle !important;
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
+/* 按钮容器：让两个按钮在一行上并排且垂直居中 */
+.actionButtons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* 小按钮高度强制与 input 一致 */
+.btnBlueSmall,
+.btnRedSmall {
+  height: 34px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px;
+  font-size: 14px;
+}
+
+/* 动作按钮单元格，让内容垂直居中 */
+.actionCell {
+  vertical-align: middle !important;
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+  white-space: nowrap; /* 防止按钮换行 */
+}
+
+/* 按钮容器(修改 + 删除)，保证横向排列 */
+.actionButtons {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px; /* 按钮间距 */
+  white-space: nowrap;
+}
+
+/* 修复按钮高度，让其与 input 一致 */
+.btnBlueSmall,
+.btnRedSmall {
+  height: 34px !important;
+  line-height: 34px !important;
+  padding: 0 14px !important;
+  font-size: 14px !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.switchWrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.switchInput {
+  position: relative;
+  width: 44px;
+  height: 22px;
+  appearance: none;
+  background: #d1d1d1;
+  border-radius: 22px;
+  cursor: pointer;
+  transition: background 0.25s;
+}
+
+.switchInput:checked {
+  background: #4caf50;
+}
+
+.switchInput::before {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.25s;
+}
+
+.switchInput:checked::before {
+  transform: translateX(22px);
+}
+
+.manageContainer {
+  margin: 80px auto;
+  padding-top: 50px;
+}

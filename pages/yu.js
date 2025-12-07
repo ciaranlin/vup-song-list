@@ -1,191 +1,164 @@
-import { useState, useEffect } from "react";
+// pages/yu.js
+import { useEffect, useState } from "react";
 import Head from "next/head";
+import { Container, Table } from "react-bootstrap";
+
+import styles from "../styles/Home.module.css";
+import AddSongForm from "../components/manage/AddSongForm";
+import SongRow from "../components/manage/SongRow";
+
+// ⭐ toast 导入
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function SongManager() {
   const [songs, setSongs] = useState([]);
-  const [songName, setSongName] = useState("");
-  const [artist, setArtist] = useState("");
-  const [language, setLanguage] = useState("国语");
-  const [BVID, setBVID] = useState("");
 
+  // 加载歌单
   const fetchSongs = async () => {
     const res = await fetch("/api/getSongs");
     const data = await res.json();
-    setSongs(data.songs);
+    setSongs(data.songs || []);
   };
 
   useEffect(() => {
     fetchSongs();
   }, []);
 
-  const addSong = async () => {
-    if (!songName || !artist) return alert("请输入歌曲名和歌手");
-    const res = await fetch("/api/addSong", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ song_name: songName, artist, language, BVID })
-    });
-    const data = await res.json();
-    alert(data.message);
-    setSongName(""); setArtist(""); setBVID(""); setLanguage("国语");
-    fetchSongs();
+  // 本地更新状态
+  const handleChange = (index, key, value) => {
+    setSongs((prev) =>
+      prev.map((song) =>
+        song.index === index ? { ...song, [key]: value } : song
+      )
+    );
   };
 
-  const deleteSong = async (index) => {
-    if (!confirm("确定删除吗？")) return;
-    const res = await fetch("/api/deleteSong", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ index })
-    });
-    const data = await res.json();
-    alert(data.message);
-    fetchSongs();
-  };
-
-  const updateSong = async (song) => {
-    if (!song.song_name || !song.artist) return alert("歌曲名和歌手不能为空");
+  // ⭐ 修改（toast 绑定 mainToast）
+  const handleUpdate = async (song) => {
     const res = await fetch("/api/updateSong", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        index: song.index,
-        song_name: song.song_name,
-        artist: song.artist,
-        language: song.language,
-        BVID: song.BVID || null
-      })
+      body: JSON.stringify(song),
     });
     const data = await res.json();
-    alert(data.message);
+    toast.success(data.message || "修改成功！", {
+      containerId: "mainToast",
+    });
     fetchSongs();
   };
 
-  const handleChange = (index, key, value) => {
-    setSongs(prev => prev.map(song => song.index === index ? { ...song, [key]: value } : song));
+  // ⭐ 删除（toast 绑定 mainToast）
+  const handleDelete = async (index) => {
+    if (!confirm("确定删除？")) return;
+
+    const res = await fetch("/api/deleteSong", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ index }),
+    });
+
+    const data = await res.json();
+    toast.warn(data.message || "删除成功！", {
+      containerId: "mainToast",
+    });
+    fetchSongs();
+  };
+
+  // ⭐ 添加（toast 绑定 mainToast）
+  const handleAdd = async (payload) => {
+    const res = await fetch("/api/addSong", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await res.json();
+    toast.success(data.message || "添加成功！", {
+      containerId: "mainToast",
+    });
+    fetchSongs();
   };
 
   return (
-    <>
+    <div
+      style={{
+        paddingTop: "80px",
+        paddingBottom: "40px",
+      }}
+      className={styles.outerContainer}
+    >
+      {/* ⭐ 强制隐藏前台默认 ToastContainer（避免双重弹窗） */}
+      <style>{`
+        #ToastContainer {
+          display: none !important;
+        }
+      `}</style>
+
       <Head>
-        <title>歌单管理</title>
-        <link rel="icon" href="/public/favicon.ico" />
+        <title>歌单管理后台</title>
       </Head>
 
-      <main style={{
-        minHeight: "100vh",
-        background: "linear-gradient(135deg, #a6b9c2 0%, #d3dde0 100%)",
-        padding: "50px 20px",
-        fontFamily: "Arial, sans-serif",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center"
-      }}>
-        <h1 style={{ textAlign: "center", marginBottom: "30px", color: "#2e3a45" }}>VUP 歌单管理</h1>
+      <Container>
+        {/* 大标题（后台专用） */}
+        <h1
+          style={{
+            textAlign: "center",
+            fontSize: "38px",
+            fontWeight: 900,
+            marginBottom: "50px",
+            letterSpacing: "1px",
+            color: "#333",
+          }}
+        >
+          🎵 歌单管理后台
+        </h1>
 
-        {/* 添加歌曲 */}
-        <div style={{
-          marginBottom: "30px",
-          display: "flex",
-          justifyContent: "center",
-          flexWrap: "wrap",
-          gap: "10px"
-        }}>
-          <input
-            placeholder="歌曲名" value={songName} onChange={e => setSongName(e.target.value)}
-            style={{ padding: "8px", borderRadius: "6px", border: "1px solid #ccc", width: "150px" }}
-          />
-          <input
-            placeholder="歌手" value={artist} onChange={e => setArtist(e.target.value)}
-            style={{ padding: "8px", borderRadius: "6px", border: "1px solid #ccc", width: "150px" }}
-          />
-          <select value={language} onChange={e => setLanguage(e.target.value)}
-            style={{ padding: "8px", borderRadius: "6px", border: "1px solid #ccc" }}>
-            <option value="国语">国语</option>
-            <option value="日语">日语</option>
-            <option value="英语">英语</option>
-          </select>
-          <input
-            placeholder="BVID" value={BVID} onChange={e => setBVID(e.target.value)}
-            style={{ padding: "8px", borderRadius: "6px", border: "1px solid #ccc", width: "120px" }}
-          />
-          <button onClick={addSong}
-            style={{
-              padding: "8px 15px",
-              borderRadius: "6px",
-              border: "none",
-              backgroundColor: "#4CAF50",
-              color: "#fff",
-              cursor: "pointer",
-              boxShadow: "0 2px 5px rgba(0,0,0,0.2)"
-            }}>
-            添加
-          </button>
+        {/* 白色卡片区域 */}
+        <div className={styles.songListMarco}>
+          <AddSongForm onAdd={handleAdd} />
+
+          <Container fluid>
+            <Table responsive className={styles.tableWrapper}>
+              <thead>
+                <tr>
+                  <th style={{ width: "60px" }}>Index</th>
+                  <th>歌名</th>
+                  <th>歌手</th>
+                  <th>语言</th>
+                  <th>BVID</th>
+                  <th style={{ textAlign: "center" }}>舰长点歌</th>
+                  <th style={{ width: "140px" }}>操作</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {songs.map((song) => (
+                  <SongRow
+                    key={song.index}
+                    song={song}
+                    onChange={handleChange}
+                    onUpdate={handleUpdate}
+                    onDelete={handleDelete}
+                  />
+                ))}
+              </tbody>
+            </Table>
+          </Container>
         </div>
+      </Container>
 
-        {/* 歌曲列表 */}
-        <table style={{
-          width: "100%",
-          maxWidth: "900px",
-          borderCollapse: "separate",
-          borderSpacing: "0",
-          boxShadow: "0 6px 12px rgba(0,0,0,0.1)",
-          borderRadius: "10px",
-          overflow: "hidden",
-          backgroundColor: "#ffffff"
-        }}>
-          <thead style={{ backgroundColor: "#c1d0d9" }}>
-            <tr>
-              {["Index", "歌曲名", "歌手", "语言", "BVID", "操作"].map((th, idx) => (
-                <th key={idx} style={{ padding: "12px", borderBottom: "1px solid #ddd", color: "#2e3a45" }}>{th}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {songs.map((song, idx) => (
-              <tr key={song.index} style={{ backgroundColor: idx % 2 === 0 ? "#f9fafd" : "#eef4f7" }}>
-                <td style={{ padding: "8px" }}>{song.index}</td>
-                <td style={{ padding: "8px" }}>
-                  <input
-                    value={song.song_name} onChange={e => handleChange(song.index, "song_name", e.target.value)}
-                    style={{ padding: "6px", borderRadius: "4px", border: "1px solid #ccc", width: "100%" }}
-                  />
-                </td>
-                <td style={{ padding: "8px" }}>
-                  <input
-                    value={song.artist} onChange={e => handleChange(song.index, "artist", e.target.value)}
-                    style={{ padding: "6px", borderRadius: "4px", border: "1px solid #ccc", width: "100%" }}
-                  />
-                </td>
-                <td style={{ padding: "8px" }}>
-                  <select value={song.language} onChange={e => handleChange(song.index, "language", e.target.value)}
-                    style={{ padding: "6px", borderRadius: "4px", border: "1px solid #ccc', width: '100%" }}>
-                    <option value="国语">国语</option>
-                    <option value="日语">日语</option>
-                    <option value="英语">英语</option>
-                  </select>
-                </td>
-                <td style={{ padding: "8px" }}>
-                  <input
-                    value={song.BVID || ""} onChange={e => handleChange(song.index, "BVID", e.target.value)}
-                    style={{ padding: "6px", borderRadius: "4px", border: "1px solid #ccc", width: "100%" }}
-                  />
-                </td>
-                <td style={{ padding: "8px", display: "flex", justifyContent: "center", gap: "5px" }}>
-                  <button onClick={() => updateSong(song)}
-                    style={{ padding: "6px 12px", borderRadius: "4px", border: "none", backgroundColor: "#2196F3", color: "#fff", cursor: "pointer" }}>
-                    修改
-                  </button>
-                  <button onClick={() => deleteSong(song.index)}
-                    style={{ padding: "6px 12px", borderRadius: "4px", border: "none", backgroundColor: "#f44336", color: "#fff", cursor: "pointer" }}>
-                    删除
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </main>
-    </>
+      {/* ⭐ 唯一 Toast 容器（后台专用） */}
+      <ToastContainer
+        containerId="mainToast"
+        position="top-right"
+        autoClose={2000}
+        hideProgressBar={false}
+        closeOnClick
+        pauseOnHover
+        draggable
+        theme="colored"
+      />
+    </div>
   );
 }

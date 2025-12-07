@@ -11,8 +11,6 @@ import { Button, Col, Container, Form, Offcanvas, Row, Table } from 'react-boots
 import { toast } from 'react-toastify'
 import copy from 'copy-to-clipboard'
 
-import MusicList from '../public/music_list.json'
-
 import Banner from '../components/banner/Banner.component'
 import BannerMobile from '../components/banner/BannerMobile.component'
 import SongDetail from '../components/SongDetail.component'
@@ -25,14 +23,19 @@ import { config } from '../config/constants'
 
 
 export default function Home() {
-  //状态保存: 类别选择, 搜索框, 回到顶部按钮, 移动端自我介绍, 试听窗口
+
+  // ⭐ 歌单动态加载（替代 import JSON）
+  const [musicList, setMusicList] = useState([]);
+
+  //状态保存
   const [categorySelection, setCategorySelection] = useState({
     lang: "",
     initial: "",
     paid: false,
     remark: "",
-    mood: "",  
+    mood: "",
   });
+
   const [searchBox, setSearchBox] = useState("");
   const [showToTopButton, setToTopShowButton] = useState(false);
   const [showIntro, setShowIntro] = useState(false);
@@ -40,121 +43,119 @@ export default function Home() {
   const [modalPlayerSongName, setPlayerModalSongName] = useState("");
   const [BVID, setBVID] = useState("");
 
+
+  // ⭐ 动态加载 JSON（build 后仍可更新）
   useEffect(() => {
-    //检测窗口滚动
+    async function loadSongs() {
+      const res = await fetch("/api/getSongs");
+      const data = await res.json();
+      setMusicList(data.songs || []);
+    }
+    loadSongs();
+  }, []);
+
+
+  //监听滚动
+  useEffect(() => {
     window.addEventListener("scroll", () => {
-      if (window.pageYOffset > 600) {
-        setToTopShowButton(true);
-      } else {
-        setToTopShowButton(false);
-      }
+      setToTopShowButton(window.pageYOffset > 600);
     });
   }, []);
 
-  //根据首字母和搜索框进行过滤
-  const filteredSongList = MusicList.filter(
-    (song) =>
-      //搜索框搜歌名
-      (utils.include(song.song_name, searchBox) || utils.include(song.language, searchBox) ||
-        utils.include(song.remarks, searchBox) || utils.include(song.artist, searchBox)) &&
-      //语言过滤按钮
-      (categorySelection.lang != ""
-        ? song.language?.includes(categorySelection.lang)
-        : true) &&
-      //首字母过滤按钮
-      (categorySelection.initial !=""
-        ? song.initial?.includes(categorySelection.initial)
-        : true) &&
-      //类型过滤按钮
-      (categorySelection.remark != ""
-        ? song.remarks?.toLowerCase().includes(categorySelection.remark)
-        : true) &&
-      //付费过滤按钮
-      (categorySelection.paid ? song.paid == 1 : true) &&
-      // 新类别过滤按钮
-      (categorySelection.mood != ""
-        ? song.mood?.includes(categorySelection.mood)
-        : true)
+
+  //根据条件过滤
+  const filteredSongList = musicList.filter(song =>
+    (utils.include(song.song_name, searchBox) ||
+      utils.include(song.language, searchBox) ||
+      utils.include(song.remarks, searchBox) ||
+      utils.include(song.artist, searchBox)) &&
+
+    (categorySelection.lang !== ""
+      ? song.language?.includes(categorySelection.lang)
+      : true) &&
+
+    (categorySelection.initial !== ""
+      ? song.initial?.includes(categorySelection.initial)
+      : true) &&
+
+    (categorySelection.remark !== ""
+      ? song.remarks?.toLowerCase().includes(categorySelection.remark)
+      : true) &&
+
+    (categorySelection.paid
+      ? song.paid == 1
+      : true) &&
+
+    (categorySelection.mood !== ""
+      ? song.mood?.includes(categorySelection.mood)
+      : true)
   );
 
-  //处理用户复制行为
+
+  //复制点歌
   const handleClickToCopy = (song) => {
     if (song.paid == 1) {
       copy("点歌 ￥" + song.song_name);
-      toast.success(`付费曲目 ${song.song_name} 成功复制到剪贴板!`);
+      toast.success(`付费曲目 ${song.song_name} 已复制`);
     } else {
       copy("点歌 " + song.song_name);
-      toast.success(`${song.song_name} 成功复制到剪贴板!`);
+      toast.success(`${song.song_name} 已复制`);
     }
   };
 
- // 改变语言过滤状态
-const setLanguageState = (lang) => {
-  setCategorySelection(prev => ({
-    ...prev,
-    lang: prev.lang === lang ? "" : lang
-  }));
-};
 
-// 改变首字母过滤状态
-const setInitialState = (initial) => {
-  setCategorySelection(prev => ({
-    ...prev,
-    initial: prev.initial === initial ? "" : initial
-  }));
-};
-
-// 改变备注过滤状态
-const setRemarkState = (remark) => {
-  setCategorySelection(prev => ({
-    ...prev,
-    remark: prev.remark === remark ? "" : remark
-  }));
-};
-
-// 改变付费过滤状态
-const setPaidState = () => {
-  setCategorySelection(prev => ({
-    ...prev,
-    paid: !prev.paid
-  }));
-};
-
-// 改变新分类（mood）的过滤状态
-const setMoodState = (mood) => {
-  setCategorySelection(prev => ({
-    ...prev,
-    mood: prev.mood === mood ? "" : mood
-  }));
-};
-
-
-  //随便听听
-  const handleRandomSong = () => {
-    let random = Math.floor(1 + Math.random() * MusicList.length);
-    handleClickToCopy(MusicList[random])
+  //各类过滤按钮
+  const setLanguageState = (lang) => {
+    setCategorySelection(prev => ({ ...prev, lang: prev.lang === lang ? "" : lang }));
   };
 
-  //移动端自我介绍off canvas开关
+  const setInitialState = (initial) => {
+    setCategorySelection(prev => ({ ...prev, initial: prev.initial === initial ? "" : initial }));
+  };
+
+  const setRemarkState = (remark) => {
+    setCategorySelection(prev => ({ ...prev, remark: prev.remark === remark ? "" : remark }));
+  };
+
+  const setPaidState = () => {
+    setCategorySelection(prev => ({ ...prev, paid: !prev.paid }));
+  };
+
+  const setMoodState = (mood) => {
+    setCategorySelection(prev => ({ ...prev, mood: prev.mood === mood ? "" : mood }));
+  };
+
+
+  //随机选歌
+  const handleRandomSong = () => {
+    if (musicList.length === 0) return;
+    let random = Math.floor(Math.random() * musicList.length);
+    handleClickToCopy(musicList[random]);
+  };
+
+
+  //自我介绍开关
   const handleCloseIntro = () => setShowIntro(false);
   const handleShowIntro = () => setShowIntro(true);
 
-  //滚动到顶部
+
+  //顶部回滚
   const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+
+  //打开播放器
   const showBiliPlayer = (song) => {
     setBVID(song.BVID);
     setPlayerModalShow(true);
     setPlayerModalSongName(song.song_name);
-  }
+  };
+
 
   return (
     <div className={styles.outerContainer}>
+
       <Link href={"https://live.bilibili.com/" + config.BiliLiveRoomID} passHref>
         <a target="_blank" style={{ textDecoration: "none", color: "#1D0C26" }}>
           <div className={styles.goToLiveDiv}>
@@ -166,43 +167,40 @@ const setMoodState = (mood) => {
                 width={50}
                 height={50}
               />
-              <b>
-                <i>去直播间</i>
-              </b>
+              <b><i>去直播间</i></b>
             </div>
           </div>
         </a>
       </Link>
+
+
       <div className={styles.offCanvasToggleDiv} onClick={handleShowIntro}>
         <div className={styles.cornerToggle}>
           <Image
             loader={imageLoader}
             src="assets/images/self_intro.webp"
-            alt="打开自我介绍"
+            alt="自我介绍"
             width={50}
             height={50}
           />
-          <b>
-            <i>自我介绍</i>
-          </b>
+          <b><i>自我介绍</i></b>
         </div>
       </div>
+
+
       <Container>
         <Head>
           <title>{config.Name}的歌单</title>
-          <meta name="keywords" content="B站,bilibili,哔哩哔哩,电台唱见,歌单" />
+          <meta name="keywords" content="B站,bilibili,歌单" />
           <meta name="description" content={`${config.Name}的歌单`} />
-          <link rel="icon" type="image/x-icon" href="/favicon.png"></link>
+          <link rel="icon" type="image/x-icon" href="/favicon.png" />
         </Head>
 
         <section className={styles.main}>
-          {/** 头像和标题 */}
           <Row>
-            <Banner
-              songCount={filteredSongList.length}
-            />
+            <Banner songCount={filteredSongList.length} />
           </Row>
-          {/** 过滤器控件 */}
+
           <Row>
             <SongListFilter
               categorySelection={categorySelection}
@@ -210,15 +208,15 @@ const setMoodState = (mood) => {
               setRemarkState={setRemarkState}
               setPaidState={setPaidState}
               setInitialState={setInitialState}
-              setMoodState={setMoodState}  
+              setMoodState={setMoodState}
             />
           </Row>
+
           <Row>
             <Col xs={12} md={9}>
               <Form.Control
                 className={styles.filters}
                 type="search"
-                aria-label="搜索"
                 placeholder="搜索"
                 onChange={(e) => setSearchBox(e.target.value)}
               />
@@ -226,7 +224,6 @@ const setMoodState = (mood) => {
             <Col xs={12} md={3}>
               <div className="d-grid">
                 <Button
-                  title="从下面的歌单里随机挑一首"
                   className={styles.customRandomButton}
                   onClick={handleRandomSong}
                 >
@@ -235,7 +232,8 @@ const setMoodState = (mood) => {
               </div>
             </Col>
           </Row>
-          {/** 歌单表格 */}
+
+
           <Row>
             <Col>
               <div className={styles.songListMarco}>
@@ -263,34 +261,27 @@ const setMoodState = (mood) => {
               </div>
             </Col>
           </Row>
+
         </section>
+
+
         {showToTopButton ? (
-          <button
-            onClick={scrollToTop}
-            className={styles.backToTopBtn}
-            title="返回顶部"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              fill="currentColor"
-              className="bi bi-chevron-up"
-              viewBox="0 0 16 16"
-            >
-              <path
-                fillRule="evenodd"
-                d="M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708l6-6z"
-              />
+          <button onClick={scrollToTop} className={styles.backToTopBtn}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+              fill="currentColor" className="bi bi-chevron-up" viewBox="0 0 16 16">
+              <path fillRule="evenodd"
+                d="M7.646 4.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1-.708.708L8 5.707l-5.646 5.647a.5.5 0 0 1-.708-.708l6-6z" />
             </svg>
           </button>
-        ) : (
-          <div></div>
-        )}
+        ) : <div></div>}
+
+
         <footer className={styles.footer}>
           {config.Footer}
         </footer>
+
       </Container>
+
 
       <Offcanvas show={showIntro} onHide={handleCloseIntro}>
         <Offcanvas.Header closeButton>
@@ -301,12 +292,14 @@ const setMoodState = (mood) => {
         </Offcanvas.Body>
       </Offcanvas>
 
+
       <BiliPlayerModal
         show={modalPlayerShow}
         onHide={() => setPlayerModalShow(false)}
         bvid={BVID}
         modalPlayerSongName={modalPlayerSongName}
       />
+
     </div>
   );
 }

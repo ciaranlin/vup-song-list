@@ -6,46 +6,75 @@ export default function handler(req, res) {
   if (req.method !== "POST")
     return res.status(405).json({ message: "只支持 POST 请求" });
 
-  const { index, song_name, artist, language, remarks, sticky_top, paid, BVID } = req.body;
-  if (index == null) return res.status(400).json({ message: "缺少 index" });
+  const {
+    index,
+    song_name,
+    artist,
+    language,
+    remarks,
+    sticky_top,
+    paid,
+    BVID,
+    mood,
+  } = req.body;
 
+  if (index == null)
+    return res.status(400).json({ message: "缺少 index" });
+
+  // ★ 不使用 setTimeout，立即读取文件
   const filePath = path.join(process.cwd(), "public", "music_list.json");
+
   let songs = [];
   try {
-    songs = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+    songs = JSON.parse(fs.readFileSync(filePath, "utf8"));
+    if (!Array.isArray(songs)) songs = [];
   } catch {
     songs = [];
   }
 
-  const song = songs.find(s => s.index === index);
-  if (!song) return res.status(404).json({ message: "未找到歌曲" });
+  const song = songs.find((s) => s.index === index);
+  if (!song) return res.status(404).json({ message: "歌曲不存在" });
 
-  // 更新字段，仅更新有值的字段
-  if (song_name) song.song_name = song_name;
-  if (artist) song.artist = artist;
-  if (language) song.language = language;
+  // ------------------ 字段更新 ------------------
+  if (song_name !== undefined) song.song_name = song_name;
+  if (artist !== undefined) song.artist = artist;
+  if (language !== undefined) song.language = language;
   if (remarks !== undefined) song.remarks = remarks;
   if (sticky_top !== undefined) song.sticky_top = sticky_top;
   if (paid !== undefined) song.paid = paid;
-  if (BVID !== undefined && BVID !== null && BVID !== "" && BVID !== "null") song.BVID = BVID;
-  else if (!BVID || BVID === "null") delete song.BVID;
 
-  // 中文首字母
+  // mood（舰长点歌）
+  if (!mood) delete song.mood;
+  else song.mood = "舰长点歌";
+
+  // BVID
+  if (BVID) song.BVID = BVID;
+  else delete song.BVID;
+
+  // 自动首字母
   if (song.song_name && /[\u4e00-\u9fa5]/.test(song.song_name[0])) {
-    const py = pinyin(song.song_name[0], { style: pinyin.STYLE_FIRST_LETTER })[0][0];
-    song.initial = py ? py.toUpperCase() : undefined;
+    const py = pinyin(song.song_name[0], {
+      style: pinyin.STYLE_FIRST_LETTER,
+    })[0][0];
+    song.initial = py?.toUpperCase();
   } else {
     delete song.initial;
   }
 
-  // 写入前清理 null 或 "null"
-  songs = songs.map(song => {
-    Object.keys(song).forEach(key => {
-      if (song[key] === null || song[key] === "null") delete song[key];
+  // 清理无效字段
+  songs = songs.map((s) => {
+    Object.keys(s).forEach((key) => {
+      if (s[key] === null || s[key] === "null" || s[key] === undefined)
+        delete s[key];
     });
-    return song;
+    return s;
   });
 
-  fs.writeFileSync(filePath, JSON.stringify(songs, null, 2));
-  res.status(200).json({ message: "修改成功", song });
+  // ★ 同步写入，确保前端下一次 fetchSongs() 读到最新数据
+  fs.writeFileSync(filePath, JSON.stringify(songs, null, 2), "utf8");
+
+  console.log(`updateSong 写入成功 index=${index}`);
+
+  // ★ 现在才返回（保证数据已经落盘）
+  res.status(200).json({ message: "修改成功！" });
 }
