@@ -96,7 +96,7 @@ export default function SongManager() {
       `}</style>
 
       <Head>
-        <title>歌单管理后台</title>
+        <title>🌟🐟の歌单管理</title>
       </Head>
 
       <Container>
@@ -111,7 +111,7 @@ export default function SongManager() {
             color: "#333",
           }}
         >
-          🎵 歌单管理后台
+          🌟🐟の歌单管理
         </h1>
 
         {/* 白色卡片区域 */}
